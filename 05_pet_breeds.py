@@ -1,4 +1,11 @@
 from fastai.vision.all import *
+import torch
+
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+    print(f"GPU is available: {torch.cuda.get_device_name(0)}")
+else:
+    print("GPU is not available.")
 
 path = untar_data(URLs.PETS)
 Path.BASE_PATH = path
@@ -15,6 +22,4 @@ pets = DataBlock(blocks=(ImageBlock, CategoryBlock),
 dls = pets.dataloaders(path/"images")
 
 learn = vision_learner(dls, resnet34, metrics=error_rate)
-learn.fit_one_cycle(3, 3e-3)
-learn.unfreeze()
-learn.fit_one_cycle(12, lr_max=slice(1e-6, 1e-4))
+learn.fine_tune(2)
